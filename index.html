@@ -1,0 +1,300 @@
+<!-- © 2022 Jean-François Pérusse -->
+
+<html>
+    <head>
+        <title>Codea Web Client</title>
+        <meta charset="UTF-8">
+        <script type="text/javascript">
+            window.indexedDB;
+         </script>        
+        <script src="fengari-web.js" type="text/javascript"></script>
+        <script src="jszip.min.js" type="text/javascript"></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+        <script src="https://unpkg.com/jquery.terminal@2.x.x/js/jquery.terminal.min.js"></script>
+        <template id="greetings">
+   __  ____   ___  __  ____  ____   __  
+ _(  )/ ___) / __)/  \(    \(  __) / _\ 
+/ \) \\___ \( (__(  O )) D ( ) _) /    \
+\____/(____/ \___)\__/(____/(____)\_/\_/
+        </template>        
+        <link rel="stylesheet" href="https://unpkg.com/jquery.terminal@2.x.x/css/jquery.terminal.min.css"/>
+        <style>
+            @font-face {
+                font-family: AcademyEngravedLetPlain;
+                src: local("Academy Engraved LET Plain"),
+                    local("AcademyEngravedLetPlain"),
+                    url(Fonts/AcademyEngravedLetPlain.ttf);
+            }
+            @font-face {
+                font-family: AmericanTypewriter-Bold;
+                src: local("American Typewriter Bold"),
+                    local("AmericanTypewriter-Bold"),
+                    url(Fonts/AmericanTypewriter-Bold.ttf);
+            }
+            @font-face {
+                font-family: Baskerville-SemiBoldItalic;
+                src: local("Baskerville SemiBold Italic"),
+                    local("Baskerville-SemiBoldItalic"),
+                    url(Fonts/Baskerville-SemiBoldItalic.ttf);
+            }
+            @font-face {
+                font-family: Copperplate;
+                src: local("Copperplate Regular"),
+                    local("Copperplate"),
+                    url(Fonts/Copperplate.ttf);
+            }
+            @font-face {
+                font-family: SourceSansPro-Bold;
+                src: local("Source Sans Pro Bold"),
+                    local("SourceSansPro-Bold"),
+                    url(Fonts/SourceSansPro-Bold.ttf);
+            }
+            @font-face {
+                font-family: AppleColorEmoji;
+                src: local("AppleColorEmoji"),
+                    local("Apple Color Emoji"),
+                    url(Fonts/NotoColorEmoji.ttf);
+            }
+        </style>
+        <link rel="preload" as="font" href="/Fonts/AcademyEngravedLetPlain.ttf" type="font/ttf" crossorigin="anonymous">
+        <link rel="preload" as="font" href="/Fonts/AmericanTypewriter-Bold.ttf" type="font/ttf" crossorigin="anonymous">
+        <link rel="preload" as="font" href="/Fonts/Baskerville-SemiBoldItalic.ttf" type="font/ttf" crossorigin="anonymous">
+        <link rel="preload" as="font" href="/Fonts/Copperplate.ttf" type="font/ttf" crossorigin="anonymous">
+        <link rel="preload" as="font" href="/Fonts/SourceSansPro-Bold.ttf" type="font/ttf" crossorigin="anonymous">
+        <link rel="preload" as="font" href="/Fonts/NotoColorEmoji.ttf" type="font/ttf" crossorigin="anonymous">
+    </head>
+    <body>
+        <script>
+            function levelEnd(index, name) {
+                surveyFrame = document.getElementById("survey-frame");
+                surveyFrame.src = "https://docs.google.com/forms/d/e/1FAIpQLScq8cHsg_TrVtO3g2NtNVqjMDz9cJi0sMokUimCC2zSxBLkjA/viewform?embedded=true&entry.449887126=" + encodeURIComponent(name);
+                surveyContainer.style.display = "block";
+            }
+
+            function closeSurvey() {
+                surveyContainer.style.display = "none";
+            }
+
+            function getParameters() {
+                return Object.fromEntries(new URLSearchParams(location.search));
+            }
+
+            function shareLevel(data) {
+                window.open('mailto:jfperusse+lostcontrols@gmail.com?subject=Lost Controls Level&body=' + encodeURIComponent(data), 'mail');
+            }
+        </script>
+        <style>
+            .survey-container {
+                display: none; /* Hidden by default */
+                position: fixed; /* Stay in place */
+                z-index: 1; /* Sit on top */
+                padding-top: 20px; /* Location of the box */
+                left: 0;
+                top: 0;
+                width: 100%; /* Full width */
+                height: 100%; /* Full height */
+                overflow: auto; /* Enable scroll if needed */
+                background-color: rgb(0,0,0); /* Fallback color */
+                background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            }
+            .survey-content {
+                position: relative;
+                background-color: #fefefe;
+                margin: auto;
+                margin-right: 20px;
+                padding: 0;
+                border: 1px solid #888;
+                width: 50%;
+                box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+                -webkit-animation-name: animatetop;
+                -webkit-animation-duration: 0.4s;
+                animation-name: animatetop;
+                animation-duration: 0.4s
+            }
+            .close {
+                color: #aaa;
+                float: right;
+                font-size: 28px;
+                font-weight: bold;
+            }
+            .close:hover,
+            .close:focus {
+                color: black;
+                text-decoration: none;
+                cursor: pointer;
+            }            
+            @-webkit-keyframes animatetop {
+                from {top:-300px; opacity:0} 
+                to {top:0; opacity:1}
+            }
+            @keyframes animatetop {
+                from {top:-300px; opacity:0}
+                to {top:0; opacity:1}
+            }
+        </style>
+        <div id="survey-container" class="survey-container">
+            <div class="survey-content">
+                <span class="close" onclick="closeSurvey()">&times;&nbsp;</span>
+                <iframe id="survey-frame" src="" width="100%" height="600" frameborder="0" marginheight="0" marginwidth="0">Loading…</iframe><br><br>    
+            </div>
+        </div>
+        Volume: <input type="range" id="volume" min="0" max="1" value="0.05" step="0.01"><span id="volumeValue">0 %</span>
+        <script>
+            var volumeElement = document.getElementById("volume");
+            var startVolume = localStorage.getItem('volume') || '0.05';
+            console.log("init volume to " + startVolume);
+            volumeElement.value = startVolume;
+        </script>
+        <style>
+            .button {
+                background-color: #008CBA;
+                border: none;
+                color: white;
+                padding: 2px 4px;
+                text-align: center;
+                text-decoration: none;
+                display: inline-block;
+                font-size: 16px;
+                margin: 2px 2px;
+                cursor: pointer;
+            }            
+        </style>
+        <span style="width:1024px;height:20px;" id="myDiv"></span>&nbsp;&nbsp;<a href="https://trello.com/b/fytQBUsy/lost-controls" target="_blank" class="button">Trello</a>
+        <br>
+        <canvas style="width:800px;height:600px;" width="1024px" height="768px" id="myCanvas">Canvas is not supported on your browser.</canvas>
+        <span style="vertical-align:top;display:inline-block;">
+            <widgetbot id="widgetbot" server="1010304551263416400" channel="1010304551817068576" width="500" height="45%"></widgetbot>
+            <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
+            <br>
+            <div id="terminal" style="vertical-align:top;display:inline-block;"></div>
+        </span>
+        <div>
+            <span style="width:800px;vertical-align:top;display:inline-block;">
+                <h1>Lost Controls - User Manual</h1>
+
+                <hr>
+
+                <h2>Goal</h2>
+                Get the robot (@) to the end of the level (*).
+
+                <hr>
+
+                <h2><font color="#bbbbbb" size="2">not so lost </font>Controls</h2>
+                <b>Enter, Space</b>: Skip text<br>
+                <b>Arrow Keys, WASD</b>: Move around<br>
+                <b>1-3</b>: Drop module<br>
+                <b>4-6</b>: Take module<br>
+                
+                <hr>
+
+                <h2>Legend</h2>
+
+                <b>@</b>: Robot (Player)<br>
+                <b>*</b>: Goal<br>
+                <b>#</b>: Wall<br>
+                <b>NSWE</b>: Direction modules (North, South, West, East)<br>
+                <i>And more to discover!</i>
+
+                <hr>
+
+                <style>
+                    @keyframes robotAnim {
+                        from { background-position: 0px; }
+                        to { background-position: -32px; }
+                    }
+
+                    .robot {
+                        height:16px;
+                        width:16px;
+                        background:url('Robot_v1.png');
+                        vertical-align:top;
+                        display:inline-block;
+                        animation-name: robotAnim; 
+                        animation-duration: 1.0s;
+                        animation-timing-function: steps(2);
+                        animation-iteration-count: infinite;
+                    }
+                </style>
+
+
+                <h2>Release Notes</h2>
+                <h3>August 31st, 2022</h3>
+                <ul>
+                    <li>Clamp the DeltaTime to a maximum of 1 second (like Codea).</li>
+                    <li>Dynamically resize Discord to always fit beside the game.</li>
+                </ul>
+                <h3>August 30th, 2022</h3>
+                <ul>
+                    <li>Save the volume value.</li>
+                    <li>Lower default volume value (10% instead of 25%).</li>
+                    <li>Load the game automatically with a new "Tap to Start" screen.</li>
+                    <li>Better Discord integration on the web page.</li>
+                </ul>
+                <h3>August 29th, 2022</h3>
+                <ul>
+                    <li>The long awaited sprites are in! (yes, I was waiting for that) <span class="robot"></span></li>
+                    <li>The canvas now uses the full height so you can see all the details in the pixels.</li>
+                    <li>Updated the survey to be an annoying pop-up. Sorry!</li>
+                </ul>
+                <h3>August 20th, 2022</h3>
+                <ul>
+                    <li>New feature: portable portals</li>
+                    <li>New feature: horizontal/vertical modules</li>
+                    <li><a href="?levelToLoad=50">Two new levels</a> with the new features</li>
+                    <li>Disabled warping through walls and closed doors</li>
+                    <ul>
+                        <li>I feel like it is easier to see this as a "jump"</li>
+                    </ul>
+                </ul>
+                <h3>August 19th, 2022</h3>
+                <ul>
+                    <li>Updated survey to use Google Forms</li>
+                    <li>Added a Discord widget because, why not</li>
+                    <li>Fixed an issue with blood and water (thanks Tony!)</li>
+                    <li>Easier access to the level editor</li>
+                    <li>Added ability to share new levels</li>
+                    <li>Fixed level visibility issue when cheating</li>
+                    <li>Fixed localization issue with level 2</li>
+                </ul>
+                <h3>August 11th, 2022</h3>
+                <ul>
+                    <li>Major UI changes to display the full level</li>
+                    <li>Added full keyboard support for JSCodea</li>
+                    <li>Fixed some issues with emojis (⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️)</li>
+                </ul>
+                <h3>August 8th, 2022</h3>
+                <ul>
+                    <li>Added WASD support</li>
+                    <li>Fixed levels 48 (Grenadier) and 49 (Frogger)</li>
+                    <li>Added Previous and Next Level buttons in the editor</li>
+                    <li>Added level name in the editor</li>
+                    <li>Fixed issue with the boxes color</li>
+                    <li>French localization tweaks</li>
+                    <li>Added a surver after each level</li>
+                    <li>Added Release Notes 😅</li>
+                </ul>
+            </span>
+        </div>
+
+        <script>
+            if (false) {
+                setTimeout(function() {
+                    levelEnd(1, "ThisIsATest");
+                }, 1000);
+            }
+        </script>
+
+        <!-- <input type="file" id="codeaProjects" name="codeaProjects" accept=".zip"> -->
+
+        <script type="application/lua" src="core.lua?version=1"></script>
+        <script type="application/lua" src="class.lua?version=1"></script>
+        <script type="application/lua" src="color.lua?version=1"></script>
+        <script type="application/lua" src="vec2.lua?version=1"></script>
+        <script type="application/lua" src="js_runtime.lua?version=1"></script>
+
+        <script src="https://sfxr.me/riffwave.js"></script>
+        <script src="https://sfxr.me/sfxr.js"></script>
+        <script src="loader.js?version=1"></script>
+        <script src="runtime.js?version=3"></script>
+    </body>
+</html>
