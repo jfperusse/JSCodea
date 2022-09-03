@@ -3,7 +3,6 @@
 
 js = require "js"
 context = js.global
-myDiv = context.document:getElementById("myDiv")
 
 CurrentTouch = {
     id = -1,
@@ -29,7 +28,11 @@ context.luaEval = function(_, text)
 end
 
 context.luaCallSetup = function(_)
-    setup()
+    local status, err = pcall(setup)
+    if not status then
+        context:handleError("Error in setup(): " .. err)
+        error("Restart needed.")
+    end
 
     local oldprint = print
     print = function(...)
@@ -47,7 +50,11 @@ context.luaCallSetup = function(_)
 end
 
 context.luaCallDraw = function(_)
-    draw()
+    local status, err = pcall(draw)
+    if not status then
+        context:handleError("Error in draw(): " .. err)
+        error("Restart needed.")
+    end
 
     _keyboardLeftBegan = false
     _keyboardUpBegan = false

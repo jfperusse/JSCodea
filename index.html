@@ -11,12 +11,130 @@
         <script src="jszip.min.js" type="text/javascript"></script>
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
         <script src="https://unpkg.com/jquery.terminal@2.x.x/js/jquery.terminal.min.js"></script>
+        <style>
+            @keyframes robotAnim {
+                from { background-position: 0px; }
+                to { background-position: -32px; }
+            }
+
+            .robot {
+                height:16px;
+                width:16px;
+                background:url('Robot_v1.png');
+                vertical-align:top;
+                display:inline-block;
+                animation-name: robotAnim; 
+                animation-duration: 1.0s;
+                animation-timing-function: steps(2);
+                animation-iteration-count: infinite;
+            }
+        </style>
         <template id="greetings">
    __  ____   ___  __  ____  ____   __  
  _(  )/ ___) / __)/  \(    \(  __) / _\ 
 / \) \\___ \( (__(  O )) D ( ) _) /    \
 \____/(____/ \___)\__/(____/(____)\_/\_/
-        </template>        
+        </template>
+        <template id="initialPrompt">
+Type '[[b;green;]help]' for a list of commands.
+        </template>
+        <template id="help">
+[[b;green;]help]: show this messages
+[[b;green;]changelog]: show the latest updates
+[[b;green;]manual]: show the user manual
+[[b;green;]roadmap]: show the backlog and in-progress tasks
+
+Other commands are interpreted by Lua.
+        </template>
+        <template id="changelog">
+[[b;green;]August 8th, 2022]
+• Added WASD support
+• Fixed levels 48 (Grenadier) and 49 (Frogger)
+• Added Previous and Next Level buttons in the editor
+• Added level name in the editor
+• Fixed issue with the boxes color
+• French localization tweaks
+• Added a surver after each level
+• Added Release Notes 😅
+
+[[b;green;]August 11th, 2022]
+• Major UI changes to display the full level
+• Added full keyboard support for JSCodea
+• Fixed some issues with emojis (⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️)
+
+[[b;green;]August 19th, 2022]
+• Updated survey to use Google Forms
+• Added a Discord widget because, why not
+• Fixed an issue with blood and water (thanks Tony!)
+• Easier access to the level editor
+• Added ability to share new levels
+• Fixed level visibility issue when cheating
+• Fixed localization issue with level 2
+
+[[b;green;]August 20th, 2022]
+• New feature: portable portals
+• New feature: horizontal/vertical modules
+• [[!;;;;?levelToLoad=50]Two new levels] with the new features
+• Disabled warping through walls and closed doors
+    • I feel like it is easier to see this as a "jump"
+
+[[b;green;]August 29th, 2022]
+• The long awaited sprites are in! [[@;;;;Robot_v1.png]]
+• The canvas now uses the full height.
+• (so you can see all the details in the pixels)
+• Updated the survey to be an annoying pop-up. Sorry!
+
+[[b;green;]August 30th, 2022]
+• Save the volume value.
+• Lower default volume value (10% instead of 25%).
+• Load the game automatically.
+• Add a "Tap to Start" screen.
+• Better Discord integration on the web page.
+
+[[b;green;]August 31st, 2022]
+• Clamp the DeltaTime to a maximum of 1 second (like Codea).
+• Dynamically resize Discord to always fit beside the game.
+• Add a Terminal to view print messages and enter commands.
+• New tutorial for the first level with the jump.
+• New levels [[!;;;;?levelToLoad=52]Mine Field 2] and [[!;;;;?levelToLoad=53]Mine Field 3]
+
+[[b;green;]September 1st, 2022]
+• Prevent warping inside a box.
+• Fixed missing items when editing from the first levels.
+• Added fans (can jump over, blocks blood). See [[!;;;;?levelToLoad=46]Placement].
+• Brought back a [[!;;;;?levelToLoad=54]level] that was using warp.
+• Catch errors in setup() and draw() to display them here.
+• Added a checkbox to disable the survey.
+• Added a level variation [[!;;;;?levelToLoad=55]Portable 2].
+• Hide the diamond when the level is complete.
+• Don't allow testing invalid levels.
+
+[[b;green;]September 2nd, 2022]
+• Added undo support.
+• Moved manual and changelog to Terminal commands.
+• Updated the page's background and text colors.
+• Restart is now on 'R' instead of 'Escape'.
+• Latest changelog is now in the Terminal greeting.
+• Added a fullscreen mode for supported browsers.
+• Improved support for vertical aspect ratio.
+• Fixed some bugs.
+        </template>
+        <template id="latestChangelog">
+[[b;green;]September 3rd, 2022]
+• Fixed a bug with undo and portable portals.
+        </template>
+        <template id="manual">
+[[b;green;]Goal]
+• Get the robot to the end of the level ([[@;;;;Crystal.png]]).
+
+[[i;green;]Not so lost] [[b;green;]Controls]
+• [[b;orange;]Enter, Space]: Skip text
+• [[b;orange;]Arrow Keys, WASD]: Move around
+• [[b;orange;]1-3]: Drop module
+• [[b;orange;]4-6]: Take module
+• [[b;orange;]R]: Restart level
+• [[b;orange;]Backspace]: Undo last move
+        </template>
         <link rel="stylesheet" href="https://unpkg.com/jquery.terminal@2.x.x/css/jquery.terminal.min.css"/>
         <style>
             @font-face {
@@ -55,6 +173,10 @@
                     local("Apple Color Emoji"),
                     url(Fonts/NotoColorEmoji.ttf);
             }
+            body {
+                color: white;
+                background-color: #282831;
+            }
         </style>
         <link rel="preload" as="font" href="/Fonts/AcademyEngravedLetPlain.ttf" type="font/ttf" crossorigin="anonymous">
         <link rel="preload" as="font" href="/Fonts/AmericanTypewriter-Bold.ttf" type="font/ttf" crossorigin="anonymous">
@@ -66,9 +188,12 @@
     <body>
         <script>
             function levelEnd(index, name) {
-                surveyFrame = document.getElementById("survey-frame");
-                surveyFrame.src = "https://docs.google.com/forms/d/e/1FAIpQLScq8cHsg_TrVtO3g2NtNVqjMDz9cJi0sMokUimCC2zSxBLkjA/viewform?embedded=true&entry.449887126=" + encodeURIComponent(name);
-                surveyContainer.style.display = "block";
+                var enableSurveyElement = document.getElementById("enableSurvey");
+                if (enableSurveyElement.checked) {
+                    surveyFrame = document.getElementById("survey-frame");
+                    surveyFrame.src = "https://docs.google.com/forms/d/e/1FAIpQLScq8cHsg_TrVtO3g2NtNVqjMDz9cJi0sMokUimCC2zSxBLkjA/viewform?embedded=true&entry.449887126=" + encodeURIComponent(name);
+                    surveyContainer.style.display = "block";
+                }
             }
 
             function closeSurvey() {
@@ -142,140 +267,41 @@
         <script>
             var volumeElement = document.getElementById("volume");
             var startVolume = localStorage.getItem('volume') || '0.05';
-            console.log("init volume to " + startVolume);
             volumeElement.value = startVolume;
+        </script>
+        <input type="checkbox" id="enableSurvey" checked="false">Enable Survey
+        <script>
+            var enableSurveyElement = document.getElementById("enableSurvey");
+            var startEnabled = localStorage.getItem('enableSurvey') == 1;
+            enableSurveyElement.checked = startEnabled;
+            enableSurveyElement.onclick = function() {
+                localStorage.setItem('enableSurvey', enableSurveyElement.checked ? 1 : 0);
+            };
         </script>
         <style>
             .button {
                 background-color: #008CBA;
+                border-radius: 4px;
                 border: none;
                 color: white;
                 padding: 2px 4px;
                 text-align: center;
                 text-decoration: none;
                 display: inline-block;
-                font-size: 16px;
-                margin: 2px 2px;
+                font-size: 12px;
+                margin: 0px 38px;
                 cursor: pointer;
-            }            
+            }
         </style>
-        <span style="width:1024px;height:20px;" id="myDiv"></span>&nbsp;&nbsp;<a href="https://trello.com/b/fytQBUsy/lost-controls" target="_blank" class="button">Trello</a>
+        <span style="display:inline-block;position:absolute;right:0;"><button class="button" id="fullscreenButton" onclick="goFullscreen()">Go Fullscreen</button></span>
         <br>
         <canvas style="width:800px;height:600px;" width="1024px" height="768px" id="myCanvas">Canvas is not supported on your browser.</canvas>
         <span style="vertical-align:top;display:inline-block;">
             <widgetbot id="widgetbot" server="1010304551263416400" channel="1010304551817068576" width="500" height="45%"></widgetbot>
             <script src="https://cdn.jsdelivr.net/npm/@widgetbot/html-embed"></script>
-            <br>
+            <br id="widgetBreak">
             <div id="terminal" style="vertical-align:top;display:inline-block;"></div>
         </span>
-        <div>
-            <span style="width:800px;vertical-align:top;display:inline-block;">
-                <h1>Lost Controls - User Manual</h1>
-
-                <hr>
-
-                <h2>Goal</h2>
-                Get the robot (@) to the end of the level (*).
-
-                <hr>
-
-                <h2><font color="#bbbbbb" size="2">not so lost </font>Controls</h2>
-                <b>Enter, Space</b>: Skip text<br>
-                <b>Arrow Keys, WASD</b>: Move around<br>
-                <b>1-3</b>: Drop module<br>
-                <b>4-6</b>: Take module<br>
-                
-                <hr>
-
-                <h2>Legend</h2>
-
-                <b>@</b>: Robot (Player)<br>
-                <b>*</b>: Goal<br>
-                <b>#</b>: Wall<br>
-                <b>NSWE</b>: Direction modules (North, South, West, East)<br>
-                <i>And more to discover!</i>
-
-                <hr>
-
-                <style>
-                    @keyframes robotAnim {
-                        from { background-position: 0px; }
-                        to { background-position: -32px; }
-                    }
-
-                    .robot {
-                        height:16px;
-                        width:16px;
-                        background:url('Robot_v1.png');
-                        vertical-align:top;
-                        display:inline-block;
-                        animation-name: robotAnim; 
-                        animation-duration: 1.0s;
-                        animation-timing-function: steps(2);
-                        animation-iteration-count: infinite;
-                    }
-                </style>
-
-
-                <h2>Release Notes</h2>
-                <h3>August 31st, 2022</h3>
-                <ul>
-                    <li>Clamp the DeltaTime to a maximum of 1 second (like Codea).</li>
-                    <li>Dynamically resize Discord to always fit beside the game.</li>
-                </ul>
-                <h3>August 30th, 2022</h3>
-                <ul>
-                    <li>Save the volume value.</li>
-                    <li>Lower default volume value (10% instead of 25%).</li>
-                    <li>Load the game automatically with a new "Tap to Start" screen.</li>
-                    <li>Better Discord integration on the web page.</li>
-                </ul>
-                <h3>August 29th, 2022</h3>
-                <ul>
-                    <li>The long awaited sprites are in! (yes, I was waiting for that) <span class="robot"></span></li>
-                    <li>The canvas now uses the full height so you can see all the details in the pixels.</li>
-                    <li>Updated the survey to be an annoying pop-up. Sorry!</li>
-                </ul>
-                <h3>August 20th, 2022</h3>
-                <ul>
-                    <li>New feature: portable portals</li>
-                    <li>New feature: horizontal/vertical modules</li>
-                    <li><a href="?levelToLoad=50">Two new levels</a> with the new features</li>
-                    <li>Disabled warping through walls and closed doors</li>
-                    <ul>
-                        <li>I feel like it is easier to see this as a "jump"</li>
-                    </ul>
-                </ul>
-                <h3>August 19th, 2022</h3>
-                <ul>
-                    <li>Updated survey to use Google Forms</li>
-                    <li>Added a Discord widget because, why not</li>
-                    <li>Fixed an issue with blood and water (thanks Tony!)</li>
-                    <li>Easier access to the level editor</li>
-                    <li>Added ability to share new levels</li>
-                    <li>Fixed level visibility issue when cheating</li>
-                    <li>Fixed localization issue with level 2</li>
-                </ul>
-                <h3>August 11th, 2022</h3>
-                <ul>
-                    <li>Major UI changes to display the full level</li>
-                    <li>Added full keyboard support for JSCodea</li>
-                    <li>Fixed some issues with emojis (⬆️⬆️⬇️⬇️⬅️➡️⬅️➡️)</li>
-                </ul>
-                <h3>August 8th, 2022</h3>
-                <ul>
-                    <li>Added WASD support</li>
-                    <li>Fixed levels 48 (Grenadier) and 49 (Frogger)</li>
-                    <li>Added Previous and Next Level buttons in the editor</li>
-                    <li>Added level name in the editor</li>
-                    <li>Fixed issue with the boxes color</li>
-                    <li>French localization tweaks</li>
-                    <li>Added a surver after each level</li>
-                    <li>Added Release Notes 😅</li>
-                </ul>
-            </span>
-        </div>
-
         <script>
             if (false) {
                 setTimeout(function() {
@@ -290,11 +316,11 @@
         <script type="application/lua" src="class.lua?version=1"></script>
         <script type="application/lua" src="color.lua?version=1"></script>
         <script type="application/lua" src="vec2.lua?version=1"></script>
-        <script type="application/lua" src="js_runtime.lua?version=1"></script>
+        <script type="application/lua" src="js_runtime.lua?version=10"></script>
 
         <script src="https://sfxr.me/riffwave.js"></script>
         <script src="https://sfxr.me/sfxr.js"></script>
         <script src="loader.js?version=1"></script>
-        <script src="runtime.js?version=3"></script>
+        <script src="runtime.js?version=18"></script>
     </body>
 </html>

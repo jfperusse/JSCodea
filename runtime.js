@@ -8,6 +8,7 @@ var surveyFrame = document.getElementById("survey-frame");
 var surveyContainer = document.getElementById("survey-container");
 var feedbackForm = document.getElementById("form-feedback");
 var textareaFeedback = document.getElementById("textarea-feedback");
+var widgetBreak = document.getElementById("widgetBreak");
 var musicAudio = new Audio();
 var soundAudio = new Audio(); // TODO: Should allow playing multiple concurrent sounds instead!
 
@@ -15,6 +16,23 @@ window.onclick = function(event) {
     if (event.target == surveyContainer) {
         surveyContainer.style.display = "none";
     }
+}
+
+var requestFullScreen = 
+    myCanvas.requestFullscreen ||
+    myCanvas.mozRequestFullScreen ||
+    myCanvas.webkitRequestFullScreen ||
+    myCanvas.msRequestFullscreen;
+
+function goFullscreen() {
+    if (requestFullScreen) {
+        requestFullScreen.call(myCanvas);
+    }
+}
+
+if (!requestFullScreen) {
+    var button = document.getElementById("fullscreenButton");
+    button.style.display = "none";
 }
 
 const CORNER = 0
@@ -53,9 +71,33 @@ function getMousePos(e) {
 
 function sendLuaMouse(state, e) {
     var mousePos = getMousePos(e);
-    var x = (mousePos.x / myCanvas.offsetWidth) * width;
-    var y = ((myCanvas.offsetHeight - mousePos.y) / myCanvas.offsetHeight) * height;
-    luaMouse(state, x, y);
+    var mousePosX = mousePos.x;
+    var mousePosY = myCanvas.offsetHeight - mousePos.y;
+    var x;
+    var y;
+
+    if (document.fullscreenElement) {
+        var canvasRatio = myCanvas.width / myCanvas.height;
+        var offsetRatio = myCanvas.offsetWidth / myCanvas.offsetHeight;
+        if (canvasRatio > offsetRatio) {
+            var realHeight = myCanvas.offsetWidth / canvasRatio;
+            var offset = (myCanvas.offsetHeight - realHeight) / 2;
+            x = (mousePosX / myCanvas.offsetWidth) * width;
+            y = ((mousePosY - offset) / realHeight) * height;
+        }
+        else {
+            var realWidth = myCanvas.offsetHeight * canvasRatio;
+            var offset = (myCanvas.offsetWidth - realWidth) / 2;
+            x = ((mousePosX - offset) / realWidth) * width;
+            y = (mousePosY / myCanvas.offsetHeight) * height;
+        }
+    }
+    else {
+        x = (mousePosX / myCanvas.offsetWidth) * width;
+        y = (mousePosY / myCanvas.offsetHeight) * height;
+    }
+
+    luaMouse(state, x, y);    
 }
 
 function updateVolumeValue() {
@@ -69,6 +111,10 @@ function handlePrint(message) {
     terminal.echo(message);
 }
 
+function handleError(message) {
+    terminal.echo("[[;red;]" + $.terminal.escape_formatting(message) + "]");
+}
+
 updateVolumeValue();
 
 volume.oninput = updateVolumeValue;
@@ -77,7 +123,45 @@ function pageWantsInputs() {
     return textareaFeedback == document.activeElement;
 }
 
+function echoTemplate(id) {
+    var changelog = document.getElementById(id);
+    terminal.echo(changelog.innerHTML);
+}
+
 function startRuntime(luaCode) {
+    terminal = $('#terminal').terminal(function(command) {
+        if (command == "changelog" ||
+            command == "help" ||
+            command == "manual") {
+            echoTemplate(command);
+        }
+        else if (command == "roadmap") {
+            $.getJSON('https://trello.com/1/lists/6301150385781e6839062cf8/cards', function(backlog) {
+                if (backlog.length > 0) {
+                    terminal.echo("[[b;green;]Backlog]");
+                    backlog.forEach(element => {
+                        terminal.echo("• " + element.name);
+                    });
+                    terminal.echo();
+                }
+                $.getJSON('https://trello.com/1/lists/6301150385781e6839062cf9/cards', function(inProgress) {
+                    if (inProgress.length > 0) {
+                        terminal.echo("[[b;green;]In Progress]");
+                        inProgress.forEach(element => {
+                            terminal.echo("• " + element.name);
+                        });
+                    }        
+                });
+            });
+        }
+        else {
+            luaEval(command);
+        }
+    },
+    {
+        greetings: greetings.innerHTML + latestChangelog.innerHTML + initialPrompt.innerHTML
+    });
+
     myCanvas.onselectstart = function () { return false; }
 
     width = myCanvas.width;
@@ -88,13 +172,6 @@ function startRuntime(luaCode) {
     fengari.load(luaCode)();
 
     luaCallSetup();
-
-    terminal = $('#terminal').terminal(function(command) {
-        luaEval(command);
-    },
-    {
-        greetings: greetings.innerHTML + "\nCommands are evaluated in the Lua context.\n\nprint() commands are displayed here.\n"
-    });
 
     myContext.fillStyle = 'rgb(0, 0, 0)';
     myContext.fillRect(0, 0, width, height);
@@ -156,8 +233,8 @@ function startRuntime(luaCode) {
     window.addEventListener("keydown", e => {
         if (pageWantsInputs()) return;
         
-        luaKeyDown(e.key);
         if (document.activeElement == document.body) {
+            luaKeyDown(e.key);
             e.preventDefault();
         }
     });
@@ -165,8 +242,8 @@ function startRuntime(luaCode) {
     window.addEventListener("keyup", e => {
         if (pageWantsInputs()) return;
         
-        luaKeyUp(e.key);
         if (document.activeElement == document.body) {
+            luaKeyUp(e.key);
             e.preventDefault();
         }
     });
@@ -185,20 +262,42 @@ function saveLocalData(key, value) {
 }
 
 function updateCanvasSize() {
-    var newHeight = window.innerHeight - 50;
-    var newWidth = (800.0 / 600.0) * newHeight;
+    var windowRatio = window.innerWidth / window.innerHeight;
+    var canvasRatio = myCanvas.width / myCanvas.height;
+
+    var newWidth;
+    var newHeight;
+
+    var widgetWidth;
+    var widgetHeight;
+
+    if (windowRatio > canvasRatio) {
+        newHeight = window.innerHeight - 50;
+        newWidth = newHeight * canvasRatio;
+        widgetWidth = window.innerWidth - newWidth - 30;
+        widgetHeight = newHeight / 2;
+        widgetBreak.style.display = "block";
+    }
+    else {
+        newWidth = window.innerWidth - 30;
+        newHeight = newWidth / canvasRatio;
+        widgetWidth = newWidth / 2;
+        widgetHeight = window.innerHeight - newHeight - 30;
+        widgetBreak.style.display = "none";
+    }
+
     myCanvas.style.height = `${newHeight}px`;
     myCanvas.style.width = `${newWidth}px`;
 
     surveyFrame.height = newHeight;
 
     var widgetBot = document.getElementById("widgetbot");
-    widgetBot.style.height = newHeight / 2;
-    widgetBot.style.width = window.innerWidth - newWidth - 50;
+    widgetBot.style.width = widgetWidth;
+    widgetBot.style.height = widgetHeight;
 
     var terminal = document.getElementById("terminal");
-    terminal.style.height = widgetBot.style.height;
-    terminal.style.width = widgetBot.style.width;
+    terminal.style.width = widgetWidth;
+    terminal.style.height = widgetHeight;
 }
 
 function draw() {

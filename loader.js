@@ -1,7 +1,6 @@
 // © 2022 Jean-François Pérusse
 
 var input = document.getElementById("codeaProjects");
-var myDiv = document.getElementById("myDiv");
 var projects = {};
 var packs = {};
 var file = null;
@@ -177,8 +176,6 @@ function onImagesLoaded() {
 }
 
 function loadProject(projectName) {
-    myDiv.innerHTML = "";
-
     loadedProject = projects[projectName]
 
     console.log(`loading ${projectName}...`);
@@ -191,15 +188,6 @@ function loadProject(projectName) {
 }
 
 function onProjectsLoaded() {
-    myDiv.innerHTML = "";
-
-    /*
-    for (var key in projects) {
-        myDiv.innerHTML += `<button onclick="loadProject('${key}');">${key}</button>`;
-    }
-    myDiv.innerHTML += `&nbsp;&nbsp;${Object.keys(packs).length} packs.`;
-    */
-
     loadProject('LostControls');
 
     //document.getElementById("manual").style.display = "inline-block";
@@ -289,7 +277,7 @@ function loadProjects() {
 
     updateCanvasSize();
 
-    myContext.fillStyle = "#000000";
+    myContext.fillStyle = "#282831";
     myContext.fillRect(0, 0, width, height);
 
     myContext.fillStyle = "#ffffff";
