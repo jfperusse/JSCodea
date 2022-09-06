@@ -1,0 +1,14 @@
+[
+    {
+      "origin": ["http://localhost:8000"],
+      "method": ["GET"],
+      "responseHeader": ["Content-Type"],
+      "maxAgeSeconds": 3600
+    },
+    {
+      "origin": ["https://jscodea.web.app"],
+      "method": ["GET"],
+      "responseHeader": ["Content-Type"],
+      "maxAgeSeconds": 3600
+    }
+]
