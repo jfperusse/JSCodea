@@ -132,7 +132,9 @@ function startRuntime(luaCode) {
     terminal = $('#terminal').terminal(function(command) {
         if (command == "changelog" ||
             command == "help" ||
-            command == "manual") {
+            command == "manual" ||
+            command == "cheats" ||
+            command == "cheats giveInventory") {
             echoTemplate(command);
         }
         else if (command == "roadmap") {
@@ -575,6 +577,10 @@ function sprite(asset, x, y, w, h) {
 }
 
 function readImage(asset) {
+    if (typeof(asset) === "object") {
+        return asset;
+    }
+    
     var asset = asset.replace("asset.", "");
 
     var image = loadedProject.images[asset];
@@ -611,6 +617,20 @@ function copyToClipboard(data) {
     else {
         console.warn("navigator.clipboard is not supported");
     }
+}
+
+function readFromClipboard() {
+    if (navigator && navigator.clipboard && navigator.clipboard.readText) {
+        console.log("reading from clipboard...");
+        navigator.clipboard.readText().then(function(text) {
+            luaPaste(text)
+        });
+        return "";
+    }
+    else {
+        console.warn("navigator.clipboard is not supported");
+        return "";
+    }    
 }
 
 function readUint8(view, position) {

@@ -30,7 +30,7 @@ end
 context.luaCallSetup = function(_)
     local status, err = pcall(setup)
     if not status then
-        context:handleError("Error in setup(): " .. err)
+        context:handleError("Error in setup(): " .. tostring(err))
         error("Restart needed.")
     end
 
@@ -52,7 +52,7 @@ end
 context.luaCallDraw = function(_)
     local status, err = pcall(draw)
     if not status then
-        context:handleError("Error in draw(): " .. err)
+        context:handleError("Error in draw(): " .. tostring(err))
         error("Restart needed.")
     end
 
@@ -89,6 +89,12 @@ context.luaKeyUp = function(_, key)
     end
 end
 
+context.luaPaste = function(_, txt)
+    if js_paste ~= nil then
+        js_paste(txt)
+    end
+end
+
 function readLocalData(key, defaultValue)
     return context:readLocalData(key, defaultValue)
 end
@@ -110,6 +116,9 @@ end
 pasteboard = {}
 pasteboard_mt = {}
 pasteboard_mt.__index = function (t, k)
+    if k == "text" then
+        return context:readFromClipboard(v)
+    end
     warnOnce("reading pasteboard." .. k .. "is not supported")
 end
 pasteboard_mt.__newindex = function (t, k, v)
@@ -536,4 +545,12 @@ function readImage(...)
     end
 
     return context:readImage(key)
+end
+
+function deviceMetrics()
+    return {
+        platformName = "Unknown",
+        platform = "Unknown",
+        hwmodel = "Unknown"
+    }
 end
