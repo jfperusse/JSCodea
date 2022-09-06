@@ -276,7 +276,7 @@ function updateCanvasSize() {
     if (windowRatio > canvasRatio) {
         newHeight = window.innerHeight - 50;
         newWidth = newHeight * canvasRatio;
-        widgetWidth = window.innerWidth - newWidth - 30;
+        widgetWidth = window.innerWidth - newWidth - 40;
         widgetHeight = newHeight / 2;
         widgetBreak.style.display = "block";
     }
@@ -284,7 +284,7 @@ function updateCanvasSize() {
         newWidth = window.innerWidth - 30;
         newHeight = newWidth / canvasRatio;
         widgetWidth = newWidth / 2;
-        widgetHeight = window.innerHeight - newHeight - 30;
+        widgetHeight = window.innerHeight - newHeight - 40;
         widgetBreak.style.display = "none";
     }
 
