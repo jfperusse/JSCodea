@@ -10,7 +10,8 @@
         <script src="fengari-web.js" type="text/javascript"></script>
         <script src="jszip.min.js" type="text/javascript"></script>
         <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-        <script src="https://unpkg.com/jquery.terminal@2.x.x/js/jquery.terminal.min.js"></script>
+        <script src="jquery.terminal-2.34.0.min.js"></script>
+        <link href="jquery.terminal-2.34.0.min.css" rel="stylesheet"/>
         <style>
             @keyframes robotAnim {
                 from { background-position: 0px; }
@@ -81,7 +82,7 @@ Other commands are interpreted by Lua.
         <template id="changelog">
 [[b;green;]August 8th, 2022]
 • Added WASD support
-• Fixed levels [[!;;;;?levelNameToLoad=Grenadier]Grenadier] and [[!;;;;?levelNameToLoad=Frogger]Frogger].
+• Fixed levels [[!;;;;?levelNameToLoad=Grenadier;{"target":"_self"}]Grenadier] and [[!;;;;?levelNameToLoad=Frogger;{"target":"_self"}]Frogger].
 • Added Previous and Next Level buttons in the editor
 • Added level name in the editor
 • Fixed issue with the boxes color
