@@ -81,7 +81,7 @@ Other commands are interpreted by Lua.
         <template id="changelog">
 [[b;green;]August 8th, 2022]
 • Added WASD support
-• Fixed levels Grenadier and Frogger
+• Fixed levels [[!;;;;?levelNameToLoad=Grenadier]Grenadier] and [[!;;;;?levelNameToLoad=Frogger]Frogger].
 • Added Previous and Next Level buttons in the editor
 • Added level name in the editor
 • Fixed issue with the boxes color
@@ -106,7 +106,7 @@ Other commands are interpreted by Lua.
 [[b;green;]August 20th, 2022]
 • New feature: portable portals
 • New feature: horizontal/vertical modules
-• [[!;;;;?levelToLoad=51]Two new levels] with the new features
+• [[!;;;;?levelNameToLoad=Portable]Portable] and [[!;;;;?levelNameToLoad=The Wave]The Wave] with the new features
 • Disabled warping through walls and closed doors
     • I feel like it is easier to see this as a "jump"
 
@@ -128,16 +128,16 @@ Other commands are interpreted by Lua.
 • Dynamically resize Discord to always fit beside the game.
 • Add a Terminal to view print messages and enter commands.
 • New tutorial for the first level with the jump.
-• New levels [[!;;;;?levelToLoad=53]Mine Field 2] and [[!;;;;?levelToLoad=54]Mine Field 3]
+• New levels [[!;;;;?levelNameToLoad=Mine Field 2]Mine Field 2] and [[!;;;;?levelNameToLoad=Mine Field 3]Mine Field 3]
 
 [[b;green;]September 1st, 2022]
 • Prevent warping inside a box.
 • Fixed missing items when editing from the first levels.
-• Added fans (can jump over, blocks blood). See [[!;;;;?levelToLoad=46]Placement].
-• Brought back a [[!;;;;?levelToLoad=54]level] that was using warp.
+• Added fans (can jump over, blocks blood). See [[!;;;;?levelNameToLoad=Placement]Placement].
+• Brought back a [[!;;;;?levelNameToLoad=Cracks]level] that was using warp.
 • Catch errors in setup() and draw() to display them here.
 • Added a checkbox to disable the survey.
-• Added a level variation [[!;;;;?levelToLoad=55]Portable 2].
+• Added a level variation [[!;;;;?levelNameToLoad=Portable 2]Portable 2].
 • Hide the diamond when the level is complete.
 • Don't allow testing invalid levels.
 
@@ -165,7 +165,7 @@ Other commands are interpreted by Lua.
 • Fully sprite based level editor.
   • Goodbye ascii art!
 • Levels can now have an author.
-  • Added a [[!;;;;?levelToLoad=11]level by Amélie P].
+  • Added a [[!;;;;?levelNameToLoad=Ruby]level by Amélie P].
 • Added a new 'cheats' command.
         </template>
         <template id="latestChangelog">
@@ -174,7 +174,7 @@ Other commands are interpreted by Lua.
 • Increased maximum undo from 100 to 500.
 • Added a new "eraser" sprite for the level editor.
 • Smaller modules so we can better see the blood.
-• Added levels [[!;;;;?levelToLoad=57]Left Behind] and [[!;;;;?levelToLoad=57]Red Velvet].
+• Added levels [[!;;;;?levelNameToLoad=Left Behind]Left Behind] and [[!;;;;?levellevelNameToLoadToLoad=Red Velvet]Red Velvet].
 • Bug fixes.
         </template>
 
@@ -364,6 +364,6 @@ Other commands are interpreted by Lua.
         <script src="https://sfxr.me/riffwave.js"></script>
         <script src="https://sfxr.me/sfxr.js"></script>
         <script src="loader.js?version=1"></script>
-        <script src="runtime.js?version=22"></script>
+        <script src="runtime.js?version=24"></script>
     </body>
 </html>

@@ -124,8 +124,13 @@ function pageWantsInputs() {
 }
 
 function echoTemplate(id) {
-    var changelog = document.getElementById(id);
-    terminal.echo(changelog.innerHTML);
+    var template = document.getElementById(id);
+    terminal.echo(template.innerHTML);
+
+    if (id == "changelog") {
+        var template = document.getElementById("latestChangelog");
+        terminal.echo(template.innerHTML);
+    }
 }
 
 function startRuntime(luaCode) {
